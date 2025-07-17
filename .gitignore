@@ -1,0 +1,12 @@
+### came with the app
+
+staticfiles
+__pycache__/
+
+### below added by chatgpt
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+venv/
+.vscode/
