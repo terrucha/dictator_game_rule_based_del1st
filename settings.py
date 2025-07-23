@@ -3,7 +3,7 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='dictator_game',
-        display_name="Dictator Game",
+        display_name="Rule Based Delegation First",
         app_sequence=['dictator_game'],  # This links to your app folder
         num_demo_participants=100,  # Adjust as needed
     ),
@@ -37,6 +37,7 @@ ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
 DEMO_PAGE_INTRO_HTML = """ """
 
 SECRET_KEY = '9871076378040'
+data_path='players_data/'
 
 
 DATABASES = {
