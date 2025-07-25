@@ -13,7 +13,6 @@ class Constants(BaseConstants):
         return (round_number - 1) // Constants.rounds_per_part + 1
 
 class Subsession(BaseSubsession):
-    aggregated_results = models.LongStringField(blank=True, initial='{}')  # JSON string
 
     def creating_session(self):
         for player in self.get_players():
