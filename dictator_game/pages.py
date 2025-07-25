@@ -1,6 +1,8 @@
 from otree.api import *
 from .models import Constants
 import json
+import pandas as pd
+import settings
 
 
 # -----------------------------
@@ -428,6 +430,61 @@ class Thankyou(Page):
     def is_displayed(self): 
         return self.round_number == Constants.num_rounds
 
+class SaveData(Page):
+    def is_displayed(self):
+        return self.round_number == Constants.num_rounds or self.player.is_excluded
+
+    def save_player_data(self):
+            print("Saving player data...")
+
+            rows = []
+
+            for pl in self.player.in_all_rounds():          # built-in oTree helper
+                rows.append({
+                    "participant_code": pl.participant.code,
+                    "session_code":     pl.session.code,
+                    "experiment": pl.session.config['display_name'],
+                    "prolific_id": pl.field_maybe_none('prolific_id'),
+                    "part_num": 1 if int(pl.field_maybe_none('round_number')) in range(1,11) else 2 if int(pl.field_maybe_none('round_number')) in range(11,21) else 3,
+                    "round_number": pl.field_maybe_none('round_number'),
+                    "allocation": int(pl.field_maybe_none('allocation') or 0),
+                    "kept": 100 - (pl.field_maybe_none('allocation') or 0),
+                    #"random_decisions": pl.field_maybe_none('random_decisions'),
+                    "random_payoff_part": pl.field_maybe_none('random_payoff_part'),
+                    #"payoff_cents": (int(pl.field_maybe_none('kept') or 0) + 5) // 10,
+                    "is_delegation": True if  pl.field_maybe_none('round_number') in range (1,11) else True if pl.field_maybe_none('delegate_decision_optional') else False,
+                    "delegate_decision_optional": pl.field_maybe_none('delegate_decision_optional'),
+                    #"dataset_generated": pl.field_maybe_none('supervised_dataset'),
+                    "comprehension_attempts": pl.field_maybe_none('comprehension_attempts'),
+                    "incorrect_answers": pl.field_maybe_none('incorrect_answers'),
+                    "is_excluded": pl.field_maybe_none('is_excluded'),
+                    'gender': pl.field_maybe_none('gender'),           # Male / Female / Non-binary / Prefer not to say
+                    'age': pl.field_maybe_none('age'),              # 18 – 100
+                    'occupation': pl.field_maybe_none('occupation'),       # free text ≤ 100 chars
+                    'ai_use': pl.field_maybe_none('ai_use'),           # frequency scale
+                    'task_difficulty': pl.field_maybe_none('task_difficulty'),  # difficulty scale
+                    'feedback': pl.field_maybe_none('feedback'),         # optional free text ≤ 1000 chars
+                })
+
+            df = pd.DataFrame(rows)
+            static_columns = [ "prolific_id","gender", "age", "occupation", "ai_use", "task_difficulty", "feedback",'random_payoff_part','experiment','comprehension_attempts','incorrect_answers','is_excluded']
+            df[static_columns] = df[static_columns].ffill().bfill()
+            prolific_id = df['prolific_id'].iloc[0]  # Get the first Prolific ID
+            print(f"Saving data for Prolific ID: {prolific_id}")
+
+
+            # create file if missing, otherwise append (without rewriting header)
+            path=settings.data_path
+            df.to_csv(path+f'{prolific_id}.csv',  index=False)
+
+            
+    def before_next_page(self):
+        # Save player data before moving to the next page
+        print("S Round number:  ,",self.round_number)
+
+        if self.round_number == Constants.num_rounds:
+            #print("Round number: ,",self.round_number)
+            self.save_player_data()
 # -------------------------
 #  Page Sequence
 # -------------------------
@@ -444,5 +501,6 @@ page_sequence = [
     Results,                # Reusable for all parts
     Debriefing,             # At the end or if excluded
     ExitQuestionnaire,
+    SaveData,               # Save data at the end or if excluded
     Thankyou,
 ]
