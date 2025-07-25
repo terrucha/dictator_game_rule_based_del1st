@@ -2,5 +2,6 @@
 
 export DATABASE_URL=${POSTGRESQL_ADDON_URI}
 
-otree resetdb --confirm
+echo "[INFO] Resetting the database..."
+yes | otree resetdb
 otree prodserver 9000
