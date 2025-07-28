@@ -38,6 +38,7 @@ class Player(BasePlayer):
         label="How much would you like to allocate to the other participant?",
         blank=True
     )
+    final_allocations = models.LongStringField()
     prolific_id = models.StringField()
     random_decisions = models.BooleanField(blank=True)
     random_payoff_part=models.IntegerField( blank=True, min=1, max=3 )
