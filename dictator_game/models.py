@@ -1,7 +1,7 @@
 from otree.api import *
 
 class Constants(BaseConstants):
-    name_in_url = 'dictator_game'
+    name_in_url = 'game_pages'
     players_per_group = None  # No groups since it's asynchronous
     num_rounds = 30  # Total rounds (3 parts × 10 rounds)
     endowment = 100  # Amount for Dictator to allocate
